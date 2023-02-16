@@ -1,4 +1,6 @@
-import { Body, Controller, Headers, HttpCode, Post } from '@nestjs/common';
+import { Controller, Post, RawBodyRequest, Req, Res } from '@nestjs/common';
+import { createHmac } from 'crypto';
+import { Request, Response } from 'express';
 import { AppService } from './app.service';
 
 interface LineWebhookDto {
@@ -10,17 +12,23 @@ interface LineWebhookDto {
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @HttpCode(200)
   @Post('api/v1/line/webhook')
   onApiV1LineWebhook(
-    @Headers() headers: { string: string },
-    @Body() body: LineWebhookDto,
+    @Req() req: RawBodyRequest<Request>,
+    @Res() res: Response,
   ) {
-    const lineSignature = headers['x-line-signature'];
+    const lineSignature = req.headers['x-line-signature'];
+    const channelSecret = process.env.CHANNEL_SECRET;
+    const requestBody = req.rawBody;
+    const lineSignatureVerify = createHmac('SHA256', channelSecret)
+      .update(requestBody)
+      .digest('base64');
 
-    return {
-      lineSignature,
-      body,
-    };
+    if (lineSignature !== lineSignatureVerify) {
+      res.status(400).send('lineSignature !== lineSignatureVerify');
+      return;
+    }
+
+    res.status(200).send('OK');
   }
 }

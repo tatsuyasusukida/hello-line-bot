@@ -23,6 +23,7 @@ describe('LINE Webhook', () => {
       body: requestBody,
     });
 
+    console.log(webhookResponse.status);
     console.log(await webhookResponse.text());
   });
 });
