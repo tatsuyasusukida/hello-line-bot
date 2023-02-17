@@ -3,10 +3,20 @@ import fetch from 'node-fetch';
 
 describe('LINE Webhook', () => {
   it('/ (GET)', async () => {
-    const targetUrl = 'http://localhost:3000/api/v1/line/webhook';
+    const targetUrl =
+      process.env.WEBHOOK_URL || 'http://localhost:3000/api/v1/line/webhook';
     const requestBody = JSON.stringify({
       destination: 'U00000000000000000000000000000000',
-      events: [],
+      events: [
+        {
+          type: 'message',
+          replyToken: 'replyToken',
+          message: {
+            type: 'text',
+            text: 'Hello LINE',
+          },
+        },
+      ],
     });
 
     const channelSecret = process.env.CHANNEL_SECRET;
