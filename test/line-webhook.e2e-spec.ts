@@ -11,6 +11,9 @@ describe('LINE Webhook', () => {
         {
           type: 'message',
           replyToken: 'replyToken',
+          source: {
+            userId: process.env.USER_ID || 'U11111111111111111111111111111111',
+          },
           message: {
             type: 'text',
             text: 'Hello LINE',
